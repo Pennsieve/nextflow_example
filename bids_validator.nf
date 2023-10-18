@@ -1,48 +1,35 @@
 #!/usr/bin/env nextflow
 
+
+process build_virtual_path {
+    container 'pennsieve/bids-validator'
+    // Define the script to be executed
+    script:
+    """
+    python /build_virtual_path.py /job/workflow/input.csv
+    ls -la /root/data
+    """
+
+    // Other process configuration goes here
+    // ...
+}
 /*
  * bids-validator
  */
 process bids_validator {
-    container 'pennsieveci/bids-validator'
+    container 'pennsieve/bids-validator'
     output: stdout
  
+    script: 
     """
-    bids-validator /data
-    """
-}
-
-/*
- * bids-validator
- */
-process python_actions {
-    container 'python:latest'
-    output: stdout
-
-    input: stdin
- 
- 
-    """
-    #!/usr/bin/env python
-    import sys
-    import csv
-    import hashlib
-    import os
-
-    # Prints output from bids_validator process
-    print(sys.stdin.read())
+    python /build_virtual_path.py /job/workflow/input.csv
     
-    for root, dirs, files in os.walk('/data'):
-        for file in files:
-            file_path = os.path.join(root, file)
-            with open(file_path, 'rb') as file:
-                content = file.read()
-                md5_hash = hashlib.md5(content).hexdigest()
-                print(file_path + "::" + md5_hash)
+    bids-validator /root/data/rns_biomarkers_trial
+    
     """
 }
 
  
 workflow {
-    bids_validator | python_actions |  view { it.trim() }
+    bids_validator | view { it.trim() }
 }
