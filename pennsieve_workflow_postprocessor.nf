@@ -1,18 +1,5 @@
 #!/usr/bin/env nextflow
 
-process setup_persistent_volume {
-    container 'alpine'
-    memory '1GB'
-    output: stdout
-
-    containerOptions "-v pennsieve_workflow_${params.workflowJobId}:/data"
-
-    script:
-    """
-    #!/bin/sh
-    echo '$params.workflowJobId'
-    """
-}
 
 process build_virtual_path {
     container 'pennsieve/bids-validator'
@@ -30,20 +17,19 @@ process build_virtual_path {
  * bids-validator
  */
 process bids_validator {
-    input:stdin
-    container 'pennsieve/bids-validator:latest'
+    container 'pennsieve/bids-validator'
     output: stdout
  
     script: 
     """
     python /build_virtual_path.py /job/workflow/input.csv
     
-    bids-validator /root/data/
+    bids-validator /root/data/rns_biomarkers_trial
     
     """
 }
 
  
 workflow {
-    setup_persistent_volume | bids_validator | view { it.trim() }
+    bids_validator | view { it.trim() }
 }

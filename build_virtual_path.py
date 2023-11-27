@@ -13,7 +13,7 @@ def create_sym_link(source_path, target_path):
     path_parts = source_path.split("/")
     filename = path_parts[len(path_parts) - 1]
     try:
-        target_path = f"{user_path}{symlink_folder}{target_path}/{filename}"
+        target_path = f"{user_path}{symlink_folder}/{target_path}/{filename}"
         print(target_path)
 
         folder_path = os.path.dirname(target_path)
